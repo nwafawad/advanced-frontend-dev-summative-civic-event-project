@@ -1,0 +1,5 @@
+/* Focus styles for keyboard users */
+:focus-visible {
+  outline: 2px solid #3E5C76;
+  outline-offset: 2px;
+}
