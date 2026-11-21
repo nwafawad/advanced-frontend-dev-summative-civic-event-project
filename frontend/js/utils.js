@@ -1,5 +1,5 @@
 const Utils = {
-  /* ALWAYS escape API data before putting it into an HTML string (prevents XSS). */
+  // Escape HTML characters in a string to prevent XSS.
   esc(str) {
     return String(str ?? '').replace(/[&<>"']/g, c =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -48,4 +48,11 @@ const Utils = {
 
   return null;
 },
+// Returns the path to a page file, relative to the current page.
+  page(fileName) {
+    const path = location.pathname;
+    if (path.includes('/pages/admin/')) return '../' + fileName;
+    if (path.includes('/pages/'))       return fileName;
+    return 'pages/' + fileName;        // index.html
+  },
 };
