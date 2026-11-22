@@ -3,22 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CivicEvents+ login</title>
+  <title>Log in, CivicEvents+</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="../js/tailwind.config.js"></script>
   <link rel="stylesheet" href="../css/app.css">
 </head>
-<body class="bg-page text-ink">
+<body class="bg-page text-ink flex min-h-screen flex-col">
 
+  <!-- Top bar -->
+  <header class="flex items-center justify-between px-6 py-4 md:px-10">
+    <a href="login.html" class="flex items-center gap-2 font-semibold">
+      <!-- Icon: Heroicons "building-library" (outline), MIT licence, heroicons.com -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z"/>
+      </svg>
+      CivicEvents+
+    </a>
+    <a href="#site-footer" class="text-sm text-muted underline">Need help?</a>
+  </header>
 
+  <!-- Login card -->
+  <main id="main" class="flex flex-1 items-start justify-center px-4 py-10 md:py-16">
+    <div class="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+      <div id="page-message"></div>
+
+      <h1 class="text-2xl font-bold">Log in</h1>
+      <p class="mt-1 text-sm text-muted">
+        New here? <a href="signup.html" class="text-brand underline">Create an account</a>
+      </p>
+
+      <form id="login-form" class="mt-6 space-y-4" novalidate>
+        <p id="form-error" role="alert" class="empty:hidden rounded-md bg-red-50 p-3 text-sm text-red-800"></p>
+
+        <div>
+          <label for="email" class="block text-sm font-semibold">Email</label>
+          <input id="email" type="email" autocomplete="email" placeholder="you@example.com"
+                 aria-describedby="email-error"
+                 class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
+          <p id="email-error" class="mt-1 text-sm text-red-700"></p>
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-semibold">Password</label>
+          <div class="mt-1 flex gap-2">
+            <input id="password" type="password" autocomplete="current-password"
+                   aria-describedby="password-error"
+                   class="w-full rounded-md border border-gray-400 px-3 py-2">
+            <button type="button" id="toggle-password" aria-pressed="false" aria-controls="password"
+                    class="rounded-md border border-gray-400 px-3 text-sm font-semibold">Show</button>
+          </div>
+          <p id="password-error" class="mt-1 text-sm text-red-700"></p>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <input id="remember" type="checkbox" aria-describedby="remember-hint" class="mt-1 h-4 w-4">
+          <div>
+            <label for="remember" class="text-sm font-semibold">Keep me signed in</label>
+            <p id="remember-hint" class="text-xs text-muted">Leave this off on a shared computer.</p>
+          </div>
+        </div>
+
+        <button type="submit" id="login-btn"
+                class="w-full rounded-md bg-brand py-2.5 font-semibold text-white hover:bg-brand-dark">
+          Log in
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer id="site-footer" class="border-t border-gray-200 px-6 py-5 text-center text-xs text-muted">
+    Help and contact: <a href="mailto:help@civicevents.com" class="underline">help@civicevents.com</a>
+    <span class="mx-3" aria-hidden="true">·</span>
+    <a href="#" class="underline">Accessibility statement</a>
+  </footer>
 
   <script src="../js/config.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/pages/login.js"></script>
   <script src="../js/layout.js"></script>
+  <script src="../js/pages/login.js"></script>
 </body>
 </html>
