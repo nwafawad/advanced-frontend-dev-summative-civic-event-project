@@ -58,6 +58,18 @@ const UI = {
     $(container).find('button').on('click', retry);
   },
 
+  // Show an error under a field. The field needs a <p id="FIELD-error"> under it.
+  fieldError(fieldId, message) {
+    $('#' + fieldId).attr('aria-invalid', 'true').addClass('border-red-700');
+    $('#' + fieldId + '-error').text(message);
+  },
+
+  // Clear every error message inside a form.
+  clearErrors(form) {
+    $(form).find('[aria-invalid]').removeAttr('aria-invalid').removeClass('border-red-700');
+    $(form).find('[id$="-error"]').text('');
+  },
+
   // Shown when a normal user opens an admin-only page.
   forbidden() {
     $('main').html(`

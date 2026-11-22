@@ -1,4 +1,8 @@
-/* Authentication utilities */
+/* AUTH: stores the logged-in user and token.
+   "Keep me signed in" localStorage (survives closing the browser).
+   Default sessionStorage (cleared when the tab closes).
+   localStorage is less safe: any XSS script could read the token. */
+   
 const Auth = {
 
   // Save the token and user after a successful login.
@@ -68,7 +72,9 @@ const Auth = {
     this.logout('expired');
   },
 
-//  page requires login 
+  /* ROLE GUARD 1: login required 
+     Every page except login/signup calls  if (!Auth.requireLogin()) return;
+     No token or an expired token, redirect to the login page. */
   requireLogin() {
     if (this.isLoggedIn()) return true;
 
@@ -77,7 +83,11 @@ const Auth = {
     return false;
   },
 
-  // page requires admin login
+   /* ROLE GUARD 2: admin-only pages
+     Used on admin/dashboard, admin/users, admin/notifications and the
+     event/announcement/promo forms. A normal user sees "You do not have access".
+     This is for UX only. The backend's authorize(['admin']) is the real
+     security and rejects non-admins with 403. */
   requireAdmin() {
     if (!this.requireLogin()) return false;
 
@@ -88,7 +98,10 @@ const Auth = {
     return true;
   },
 
-  // Remove admin-only elements from the page if the user is not an admin.
+   /* ===== ROLE GUARD 3: admin-only buttons and links =====
+     Elements marked data-admin-only(Edit, Delete, Create) are removed
+     from the page for normal users. Removed, not hidden, so they can't be
+     shown again from DevTools. */
   applyRoleVisibility() {
     if (!this.isAdmin()) {
       $('[data-admin-only]').remove();
