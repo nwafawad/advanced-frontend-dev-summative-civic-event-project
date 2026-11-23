@@ -20,7 +20,7 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // Not logged in → login page. Admin → dashboard. Normal user → events.
+    // Not logged in goes to login, admins go to the dashboard, everyone else to events.
     if (!Auth.isLoggedIn()) {
       location.href = 'pages/login.html';
     } else if (Auth.isAdmin()) {
