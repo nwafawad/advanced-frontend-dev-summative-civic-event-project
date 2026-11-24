@@ -9,4 +9,5 @@ const CONFIG = {
     audio: { exts: ['mp3', 'wav', 'm4a', 'ogg'], maxMB: 5 },
     video: { exts: ['mp4', 'mov', 'avi', 'mkv'], maxMB: 8 },
   },
+  PROMOS_CACHE_KEY: 'ce_promos_cache',   // sessionStorage key for the cached promos list
 };
