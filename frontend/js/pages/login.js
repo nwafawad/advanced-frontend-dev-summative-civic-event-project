@@ -25,6 +25,9 @@ if (Utils.qs('registered')) {
 if (Utils.qs('reason') === 'expired') {
   showBanner('Your session expired. Please log in again.', 'warning');
 }
+if (Utils.qs('reason') === 'disabled') {
+  showBanner('This account has been disabled. Contact an administrator for help.', 'warning');
+}
 
 // Show / hide password
 $('#toggle-password').on('click', function () {
@@ -59,8 +62,14 @@ $('#login-form').on('submit', function (e) {
   Api.post('/auth/login', { email, password })
     .then(function (res) {
       Auth.save(res.data.token, res.data.user, remember);
+      // ROLE GUARD UI only: the backend does not check is_active when logging in,
+      // so we ask for the profile and sign straight out if an admin disabled this account.
+      return Api.get('/users/profile/me');
+    })
+    .then(function (res) {
+      if (res.data.is_active === false) return Auth.logout('disabled');
       // Admins go to the dashboard, normal users to the events list
-      location.href = res.data.user.role === 'admin' ? 'admin/dashboard.html' : 'events.html';
+      location.href = res.data.role === 'admin' ? 'admin/dashboard.html' : 'events.html';
     })
     .fail(function (err) {
       $('#form-error').text(err.status === 401 ? 'Wrong email or password.' : err.message);
