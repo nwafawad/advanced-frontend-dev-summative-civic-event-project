@@ -36,6 +36,33 @@ const Layout = {
       .join('');
   },
 
+  /* Admin sidebar and its links */
+  adminSidebar() {
+    const links = [
+      { file: 'admin/dashboard.html',   label: 'Dashboard' },
+      { file: 'admin/users.html',       label: 'Users' },
+      { file: 'event-form.html',        label: 'New event' },
+      { file: 'announcement-form.html', label: 'New announcement' },
+      { file: 'promo-form.html',        label: 'New promo' },
+    ];
+    const items = links.map(function (link) {
+      const current = location.pathname.endsWith('/' + link.file);
+      return `
+        <a href="${Utils.page(link.file)}" ${current ? 'aria-current="page"' : ''}
+           class="rounded-md px-3 py-2 text-sm font-semibold hover:bg-brand-tint
+                  ${current ? 'bg-brand-tint text-brand' : 'text-muted'}">${link.label}</a>`;
+    }).join('');
+
+    $('#main')
+      .addClass('md:grid md:grid-cols-[12rem_1fr] md:gap-8')
+      .wrapInner('<div class="min-w-0"></div>')
+      .prepend(`
+        <nav aria-label="Admin" class="mb-6 md:mb-0">
+          <p class="px-3 text-xs font-semibold uppercase tracking-wide text-muted">Admin</p>
+          <div class="mt-2 flex flex-wrap gap-1 md:flex-col">${items}</div>
+        </nav>`);
+  },
+
   header() {
     const user = Auth.user();
     return `
