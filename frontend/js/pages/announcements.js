@@ -5,6 +5,7 @@ $(function () {
   Layout.init();
   Auth.applyRoleVisibility();   // removes "New announcement" for normal users
 
+  // ROLE GUARD UI only: the Edit link is only drawn for admins. The API checks again (403).
   function card(item) {
     const title = Utils.esc(item.title);
     const url = Utils.esc(item.audio_url);
@@ -47,6 +48,7 @@ $(function () {
     $('#announcement-list').html(UI.skeleton(4));
     Api.get('/announcements?limit=100')
       .then(function (res) {
+        // ROLE GUARD UI only: normal users only see published announcements, admins also see drafts
         const items = res.data.filter(a => Auth.isAdmin() || a.published);
         if (items.length === 0) {
           $('#announcement-list').html(`<div class="sm:col-span-2">

@@ -173,7 +173,7 @@ $(function () {
       });
   });
 
-  // ROLE GUARD UI only: this page is admin-only, and the API checks again (403).
+  // ROLE GUARD (UI only): this page is admin-only, and the API checks again (403).
   // The toggle button is only drawn for other users, and the API rejects attempts to disable yourself (403).
   $('#user-table').on('click', '.toggle-btn', function () {
     const user = allUsers.find(u => u.id === $(this).data('id'));

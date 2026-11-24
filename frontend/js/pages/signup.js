@@ -80,7 +80,8 @@ $('#signup-form').on('submit', function (e) {
     return;
   }
 
-  // Create the account. Never send "role": everyone signs up as a normal user.
+  // ROLE GUARD UI only: never send "role", so everyone signs up as a normal user.
+  // The API would accept a role here, so this form must not offer one.
   const button = $('#signup-btn');
   UI.loading(button, true);
 

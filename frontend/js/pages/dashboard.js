@@ -3,7 +3,7 @@
 $(function () {
   if (!Auth.requireLogin()) return;
 
-  // Admins are sent to the admin dashboard instead
+  // ROLE GUARD UI only: this page is for normal users, so admins are sent to the admin dashboard
   if (Auth.isAdmin()) {
     location.replace('admin/dashboard.html');
     return;
@@ -30,6 +30,7 @@ $(function () {
   // registrations: my registrations list, notifications: my notifications list
   function renderStats(stats, registrations, notifications) {
     const upcoming = registrations.filter(r => r.status === 'registered' && !EventActions.isPast(r)).length;
+    // The API's unread number never changes (there is no "mark as read" endpoint),
     // so count unread the same way the bell does: from what was opened in this browser
     const unread = notifications.filter(n => !Layout.isRead(n.id)).length;
 

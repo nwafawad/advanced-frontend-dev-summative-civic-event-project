@@ -21,6 +21,7 @@ $(function () {
     } catch (e) { /* storage blocked or full: skip caching */ }
   }
 
+  // ROLE GUARD (UI only): the Edit link is only drawn for admins. The API checks again (403).
   function card(promo) {
     const title = Utils.esc(promo.title);
     const description = promo.description || '';
@@ -59,6 +60,7 @@ $(function () {
   }
 
   function render(promos) {
+    // ROLE GUARD UI only: normal users only see published promos, admins also see drafts
     const visible = promos.filter(p => Auth.isAdmin() || p.published);
     if (visible.length === 0) {
       $('#promo-list').html(`<div class="sm:col-span-2 lg:col-span-3">

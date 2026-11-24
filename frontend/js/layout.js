@@ -27,7 +27,8 @@ const Layout = {
   // Nav links. The current page gets aria-current="page".
   navLinks() {
     return this.links
-      // adminOnly links are for admins, userOnly links for normal users (admins cannot register for events)
+      // ROLE GUARD 3 UI only: adminOnly links are for admins, userOnly links for normal users
+      // (admins cannot register for events, so they do not get My dashboard or My registrations)
       .filter(link => (!link.adminOnly || Auth.isAdmin()) && (!link.userOnly || !Auth.isAdmin()))
       .map(link => {
         const current = location.pathname.endsWith('/' + link.file);

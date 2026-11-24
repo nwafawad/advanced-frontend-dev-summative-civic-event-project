@@ -120,7 +120,7 @@ $(function () {
     request
       .then(function (res) {
         UI.toast(eventId ? 'Event updated.' : 'Event created. All users have been notified.');
-        // Wait a moment so the message can be read, then open the event
+        // Wait a moment so the toast can be read, then go to the event page
         setTimeout(function () {
           location.href = 'event.html?id=' + res.data.id;
         }, 1200);

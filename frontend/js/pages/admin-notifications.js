@@ -102,7 +102,7 @@ $(function () {
   }
 
   // ROLE GUARD UI only: this page is admin-only, and DELETE /notifications/:id is admin-only in the API (403).
-  // Delete a notification. Its row disappears, so focus moves to the next row or the heading if it was the last one.
+  // OPTIMISTIC UPDATE: the row disappears straight away and comes back if the server says no.
   $('#notification-table').on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     const notification = all.find(n => n.id === id);

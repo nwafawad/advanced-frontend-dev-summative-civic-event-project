@@ -43,6 +43,8 @@ $(function () {
 
     const button = $('#save-btn');
     UI.loading(button, true);
+    // ROLE GUARD UI only: only name and email are sent. Role and status are shown read-only
+    // and never sent, so users cannot change their own role or re-enable a disabled account.
     Api.patch('/users/profile/me', { full_name: fullName, email: email })
       .then(function (res) {
         // Keep the saved user in step, so the header shows the new name straight away
