@@ -17,7 +17,8 @@ const Layout = {
     $('body').addClass('flex min-h-screen flex-col')
       .prepend(this.header())
       .append(this.footer());
-    $('#main').addClass('mx-auto w-full max-w-6xl flex-1 px-4 py-8');
+    // tabindex="-1" lets the skip link move focus into <main> in every browser
+    $('#main').attr('tabindex', '-1').addClass('mx-auto w-full max-w-6xl flex-1 px-4 py-8 focus:outline-none');
     this.bindEvents();
     this.loadUnreadCount();
   },

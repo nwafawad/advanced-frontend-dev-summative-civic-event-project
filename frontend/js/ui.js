@@ -32,7 +32,7 @@ const UI = {
   skeleton(count = 3) {
     let html = '';
     for (let i = 0; i < count; i++) {
-      html += '<div class="h-48 rounded-lg bg-gray-200 animate-pulse" aria-hidden="true"></div>';
+      html += '<div class="h-48 rounded-lg bg-gray-200 animate-pulse motion-reduce:animate-none" aria-hidden="true"></div>';
     }
     return html;
   },
@@ -42,6 +42,16 @@ const UI = {
     return `
       <div class="rounded-lg border border-dashed border-gray-300 p-8 text-center">
         <p class="font-semibold">${Utils.esc(title)}</p>
+        <p class="mt-1 text-sm text-muted">${Utils.esc(text)}</p>
+      </div>
+    `;
+  },
+
+  // "Not found" message for detail pages. It includes the page's <h1>.
+  notFound(title, text) {
+    return `
+      <div class="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+        <h1 class="text-xl font-semibold">${Utils.esc(title)}</h1>
         <p class="mt-1 text-sm text-muted">${Utils.esc(text)}</p>
       </div>
     `;
@@ -118,6 +128,20 @@ const UI = {
     dialog.find('.cancel').on('click', close);
     dialog.find('.ok').on('click', () => { close(); onConfirm(); });
     $(document).on('keydown.confirm', (e) => { if (e.key === 'Escape') close(); });
+
+    // Keep Tab inside the dialog: it only has two buttons, so loop between them
+    dialog.on('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      const first = dialog.find('button').first()[0];
+      const last = dialog.find('button').last()[0];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
 
     $('body').append(dialog);
     dialog.find('.cancel').focus();

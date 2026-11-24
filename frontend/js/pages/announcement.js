@@ -7,7 +7,7 @@ $(function () {
   let current = null;
 
   function notFound() {
-    $('#announcement').html(UI.empty('Announcement not found', 'It may have been removed. Go back to the announcements list.'));
+    $('#announcement').html(UI.notFound('Announcement not found', 'It may have been removed. Go back to the announcements list.'));
   }
 
   function load() {

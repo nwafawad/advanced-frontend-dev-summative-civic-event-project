@@ -8,7 +8,7 @@ $(function () {
   Layout.init();
 
   function notFound() {
-    $('#notification').html(UI.empty('Notification not found', 'It may have been deleted. Go back to your notifications.'));
+    $('#notification').html(UI.notFound('Notification not found', 'It may have been deleted. Go back to your notifications.'));
   }
 
   // The backend saves the id of the related item in metadata

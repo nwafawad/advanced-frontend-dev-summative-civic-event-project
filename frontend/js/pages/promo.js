@@ -11,7 +11,7 @@ $(function () {
   }
 
   function notFound() {
-    $('#promo').html(UI.empty('Promo not found', 'It may have been removed. Go back to the promos list.'));
+    $('#promo').html(UI.notFound('Promo not found', 'It may have been removed. Go back to the promos list.'));
   }
 
   function load() {

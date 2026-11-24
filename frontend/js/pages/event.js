@@ -13,7 +13,7 @@ $(function () {
   if (Auth.isAdmin()) $('#feedback-form').remove();
 
   function notFound() {
-    $('#event-detail').html(UI.empty('Event not found', 'It may have been deleted. Go back to the events list.'));
+    $('#event-detail').html(UI.notFound('Event not found', 'It may have been deleted. Go back to the events list.'));
   }
 
   function loadEvent() {

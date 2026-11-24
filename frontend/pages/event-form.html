@@ -19,7 +19,7 @@
 
     <div>
       <label for="title" class="block text-sm font-semibold">Title</label>
-      <input id="title" type="text" aria-describedby="title-error"
+      <input id="title" required type="text" aria-describedby="title-error"
              class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
       <p id="title-error" class="mt-1 text-sm text-red-700"></p>
     </div>
@@ -31,7 +31,7 @@
 
     <div>
       <label for="location" class="block text-sm font-semibold">Location</label>
-      <input id="location" type="text" aria-describedby="location-error"
+      <input id="location" required type="text" aria-describedby="location-error"
              class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
       <p id="location-error" class="mt-1 text-sm text-red-700"></p>
     </div>
@@ -39,13 +39,13 @@
     <div class="grid gap-5 sm:grid-cols-2">
       <div>
         <label for="starts_at" class="block text-sm font-semibold">Starts</label>
-        <input id="starts_at" type="datetime-local" aria-describedby="starts_at-error"
+        <input id="starts_at" required type="datetime-local" aria-describedby="starts_at-error"
                class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
         <p id="starts_at-error" class="mt-1 text-sm text-red-700"></p>
       </div>
       <div>
         <label for="ends_at" class="block text-sm font-semibold">Ends</label>
-        <input id="ends_at" type="datetime-local" aria-describedby="ends_at-error"
+        <input id="ends_at" required type="datetime-local" aria-describedby="ends_at-error"
                class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
         <p id="ends_at-error" class="mt-1 text-sm text-red-700"></p>
       </div>
