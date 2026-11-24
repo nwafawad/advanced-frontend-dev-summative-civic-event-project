@@ -10,7 +10,49 @@
   <link rel="stylesheet" href="../css/app.css">
 </head>
 <body class="bg-page text-ink">
-  <main id="main"></main>
+  <main id="main">
+  <a href="events.html" class="text-sm text-brand underline">Back to events</a>
+
+  <div id="event-detail" class="mt-4"></div>
+
+  <!-- ROLE GUARD 3: removed for normal users by Auth.applyRoleVisibility() -->
+  <section data-admin-only aria-labelledby="attendees-heading" class="after-load mt-10 hidden">
+    <h2 id="attendees-heading" class="text-xl font-semibold">Registered people</h2>
+    <div id="attendee-list" class="mt-3"></div>
+  </section>
+
+  <section aria-labelledby="feedback-heading" class="after-load mt-10 hidden">
+    <h2 id="feedback-heading" class="text-xl font-semibold">Feedback</h2>
+    <div id="feedback-summary" class="mt-2"></div>
+    <div id="feedback-list" class="mt-4 space-y-3"></div>
+
+    <!-- Normal users only: event.js removes this form for admins -->
+    <form id="feedback-form" class="mt-4 max-w-lg space-y-4 rounded-lg border border-gray-200 bg-white p-4" novalidate>
+      <h3 id="feedback-form-title" class="font-semibold">Rate this event</h3>
+      <p id="form-error" role="alert" class="empty:hidden rounded-md bg-red-50 p-3 text-sm text-red-800"></p>
+
+      <fieldset>
+        <legend class="text-sm font-semibold">Your rating (1 = poor, 5 = excellent)</legend>
+        <div class="mt-2 flex gap-4">
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="rating" value="1" aria-describedby="rating-error"> 1</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="rating" value="2" aria-describedby="rating-error"> 2</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="rating" value="3" aria-describedby="rating-error"> 3</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="rating" value="4" aria-describedby="rating-error"> 4</label>
+          <label class="flex items-center gap-1 text-sm"><input type="radio" name="rating" value="5" aria-describedby="rating-error"> 5</label>
+        </div>
+        <p id="rating-error" class="mt-1 text-sm text-red-700"></p>
+      </fieldset>
+
+      <div>
+        <label for="comment" class="block text-sm font-semibold">Comment <span class="font-normal text-muted">(optional)</span></label>
+        <textarea id="comment" rows="3" maxlength="500" class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2"></textarea>
+      </div>
+
+      <button type="submit" id="feedback-btn"
+              class="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">Submit feedback</button>
+    </form>
+  </section>
+</main>
 
   <script src="../js/config.js"></script>
   <script src="../js/utils.js"></script>
@@ -18,6 +60,7 @@
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/layout.js"></script>
+  <script src="../js/event-actions.js"></script>
   <script src="../js/pages/event.js"></script>
 </body>
 </html>
