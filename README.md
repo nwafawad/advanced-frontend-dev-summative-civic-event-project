@@ -9,7 +9,7 @@ Built with **HTML, Tailwind CSS (CDN) and jQuery** only. There is no build step.
 ```
 backend/               Provided Node.js / Express / PostgreSQL API
 frontend/
-  index.html           Sends you to login, the dashboard or events
+  index.html           Sends you to login, or to your dashboard (admin or user)
   css/app.css          Focus outline for keyboard users, fade between pages
   js/
     config.js          API base URL, upload limits, cache keys
@@ -20,8 +20,8 @@ frontend/
     layout.js          Header, nav, notification bell, footer, admin sidebar
     event-actions.js   Register / cancel / delete, shared by the event pages
     pages/             One script per page
-  pages/               Login, signup, events, announcements, promos, notifications, profile, my registrations
-  pages/admin/         Dashboard and users (admins only)
+  pages/               Login, signup, my dashboard, events, announcements, promos, notifications, profile, my registrations
+  pages/admin/         Dashboard, users and notifications (admins only)
 ```
 
 ## Running it locally
@@ -134,27 +134,30 @@ UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
 ```
 Then log out and log in again, because the role is stored in the login token.
 
-Log in with the admin email on the login page and you will land on the Dashboard.
+Log in with the admin email on the login page and you will land on the admin Dashboard. Normal users land on their own dashboard (My dashboard).
 
 ## Features
 
 **Every logged-in user**
 - Sign up and log in with field validation, show/hide password and "Keep me signed in"
-- Events: search (also from the header), Upcoming / Past / All filter, pages of 6, details with a map link, register and cancel
+- Events: search (also from the header), filters by date, location and Upcoming / Past / All, a Clear filters button, pages of 6, details with a map link, register and cancel
 - Feedback: rate an event from 1 to 5 with a comment, and edit your own rating
 - Announcements: audio list and detail page, with only one playing at a time
 - Promos: videos with captions built from the caption text, a Captions on/off button and a transcript
 - Notifications: bell with unread count and the latest 5, inbox with an unread filter, "Mark as read" and "Mark all as read", and a detail page linking to the event, announcement or promo
 - Profile: change your name and email
+
+**Normal users**
+- My dashboard (`GET /dashboard/me`): your registrations, feedback given and notifications (with unread), your next 3 events, and Refresh. This is where you land after logging in
 - My registrations: upcoming, past and cancelled, with Cancel
 
 **Admins**
 - Dashboard: totals and a new-users-per-month chart, with Refresh
-- Users: search, status filter, enable/disable (disabled users cannot log in)
+- Users: search, status filter, view a user's profile (`GET /users/:id`), enable/disable (disabled users cannot log in)
 - Events: create and edit with image preview and upload progress, delete, attendee list, all feedback with the average rating
 - Announcements: upload audio with preview and progress, publish/unpublish, delete
 - Promos: upload video with preview and progress, caption text, publish/unpublish, delete
-- Notifications: delete (the item disappears at once and comes back if the server refuses)
+- Notifications: a Notifications page in the admin panel with search, type filter, View and Delete. Admins can also delete from the inbox and the detail page. A deleted item disappears at once and comes back if the server refuses
 
 ## Roles and route guards
 The guards are marked in the code with `ROLE GUARD` comments.
@@ -162,8 +165,8 @@ The guards are marked in the code with `ROLE GUARD` comments.
 | Guard | Where | What it does |
 |---|---|---|
 | 1. Login required | `Auth.requireLogin()` in `js/auth.js`, called first by every page script | No token, or an expired one, sends you to the login page |
-| 2. Admin-only pages | `Auth.requireAdmin()` in `js/auth.js` | On the dashboard, users and the event/announcement/promo forms, normal users see "You do not have access to this page" |
-| 3. Admin-only links and buttons | `Auth.applyRoleVisibility()` removes `[data-admin-only]` elements; nav links marked `adminOnly` in `js/layout.js` | Normal users never see admin actions |
+| 2. Admin-only pages | `Auth.requireAdmin()` in `js/auth.js` | On the admin dashboard, users and notifications pages and the event/announcement/promo forms, normal users see "You do not have access to this page" |
+| 3. Admin-only links and buttons | `Auth.applyRoleVisibility()` removes `[data-admin-only]` elements; nav links marked `adminOnly` / `userOnly` in `js/layout.js` | Normal users never see admin actions. Admins do not see the user-only links (My dashboard, My registrations), and opening My dashboard as an admin sends you to the admin dashboard |
 | UI-only checks | `ROLE GUARD (UI only)` comments in page scripts | Edit/Delete/Publish buttons only for admins, the disabled-account check at login, hiding other users' direct notifications |
 
 These guards improve the user experience; they are not security. The real protection is the backend's `authorize(['admin'])`, which answers **403**, and the frontend shows that as a message.
@@ -199,11 +202,11 @@ The provided backend was not changed. These come from it, not from the frontend:
 - Login does not check whether an account is disabled. The frontend checks right after login and signs disabled users out, but someone already logged in keeps access until their token expires (1 hour).
 - `GET /users` returns no total count, so the users page loads everyone and pages in the browser.
 - There is no endpoint to change a password.
-- Normal users have no dashboard, so after login they go to Events. Admins go to the Dashboard.
+- `GET /dashboard/me` counts unread notifications from a `read` column that nothing ever updates, so My dashboard shows the unread count from the browser instead (same as the bell). Its registrations total includes cancelled registrations, so the card also shows how many are upcoming.
 
 **Events**
 - The `published` field is ignored on create and update, so every event is saved as published.
-- `GET /events` ignores query parameters, so search, filters and pages work in the browser.
+- `GET /events` ignores query parameters, so search, filters and pages work in the browser. There is no list of locations either, so the Location filter is built from the loaded events.
 - Cancelling keeps the registration row, so registering again for the same event fails (409). The UI says "You cancelled your registration" and hides Register.
 - Deleting an event that has registrations fails (foreign key). The UI explains why.
 - Deleting an event leaves its image file in `backend/uploads/events/`.
@@ -218,7 +221,8 @@ The provided backend was not changed. These come from it, not from the frontend:
 - Deleting an announcement or promo, or replacing a promo video, leaves the old file in `backend/uploads/`.
 
 **Notifications**
-- There is no route to send a notification by hand. They are only created automatically (new event, new or published announcement or promo), so admins can only delete them.
+- There is no route to send a notification by hand. They are only created automatically (new event, new or published announcement or promo), so the admin Notifications page can only view and delete them.
+- `GET /notifications` returns only notifications sent to everyone plus the caller's own, even for admins, so admins cannot see or delete notifications targeted at another user.
 - There is no "mark as read" endpoint, so read/unread is stored per user in the browser (localStorage).
 - `GET /notifications/:id` does not check who the notification is for, so the frontend hides direct notifications meant for someone else.
 - Deleting an event, announcement or promo leaves its notifications, so their link leads to a "not found" page.

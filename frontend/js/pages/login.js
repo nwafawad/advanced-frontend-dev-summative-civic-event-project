@@ -2,7 +2,7 @@
 
 // Already logged in? Skip the login page.
 if (Auth.isLoggedIn()) {
-  location.href = Auth.isAdmin() ? 'admin/dashboard.html' : 'events.html';
+  location.href = Auth.isAdmin() ? 'admin/dashboard.html' : 'dashboard.html';
 }
 
 // Banner at the top of the card, for messages sent from other pages
@@ -68,8 +68,8 @@ $('#login-form').on('submit', function (e) {
     })
     .then(function (res) {
       if (res.data.is_active === false) return Auth.logout('disabled');
-      // Admins go to the dashboard, normal users to the events list
-      location.href = res.data.role === 'admin' ? 'admin/dashboard.html' : 'events.html';
+      // Admins go to the admin dashboard, normal users to their own dashboard
+      location.href = res.data.role === 'admin' ? 'admin/dashboard.html' : 'dashboard.html';
     })
     .fail(function (err) {
       $('#form-error').text(err.status === 401 ? 'Wrong email or password.' : err.message);

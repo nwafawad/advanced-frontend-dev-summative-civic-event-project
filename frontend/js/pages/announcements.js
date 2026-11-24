@@ -24,7 +24,7 @@ $(function () {
           Your browser cannot play audio. <a href="${url}">Download the audio</a>.
         </audio>
         ${Auth.isAdmin() ? `<a href="announcement-form.html?id=${item.id}" aria-label="Edit ${title}"
-             class="mt-3 inline-block text-sm font-semibold text-brand underline">Edit</a>` : ''}
+             class="mt-3 inline-block rounded-md border border-gray-400 px-3 py-1.5 text-sm font-semibold">Edit</a>` : ''}
       </article>`;
   }
 

@@ -1,8 +1,8 @@
 /* Signup page */
 
-// Already logged in? No need to sign up.
+// Already logged in? No need to sign up. Go to the right dashboard.
 if (Auth.isLoggedIn()) {
-  location.href = 'events.html';
+  location.href = Auth.isAdmin() ? 'admin/dashboard.html' : 'dashboard.html';
 }
 
 // The 5 password rules. Same policy the backend enforces.

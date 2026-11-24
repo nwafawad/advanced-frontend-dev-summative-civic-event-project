@@ -211,6 +211,8 @@ $(function () {
   });
 
   $('#search').val(Utils.qs('q') || '');   // search typed in the header
+  // Only set the dropdowns if the query string has a valid value
+  if (['upcoming', 'past', 'all'].includes(Utils.qs('when'))) $('#when').val(Utils.qs('when'));
   if (Utils.qs('deleted')) UI.toast('Event deleted.');
   loadEvents();
 });

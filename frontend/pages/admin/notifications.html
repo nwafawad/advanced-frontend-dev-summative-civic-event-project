@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage notifications, CivicEvents+</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="../../js/tailwind.config.js"></script>
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="bg-page text-ink">
+  <main id="main">
+    <h1 tabindex="-1" class="text-2xl font-bold">Manage notifications</h1>
+    <p class="mt-1 text-sm text-muted">
+      Notifications are sent automatically when events, announcements and promos are published.
+      Deleting one removes it for every user.
+    </p>
+
+    <div class="mt-6 flex flex-wrap items-end gap-3">
+      <div class="w-full sm:w-72">
+        <label for="search" class="block text-sm font-semibold">Search by title or message</label>
+        <input id="search" type="search" class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
+      </div>
+      <div>
+        <label for="type" class="block text-sm font-semibold">Type</label>
+        <select id="type" class="mt-1 rounded-md border border-gray-400 px-3 py-2">
+          <option value="all">All</option>
+          <option value="event">Event</option>
+          <option value="announcement">Announcement</option>
+          <option value="promo">Promo</option>
+        </select>
+      </div>
+      <p id="result-count" class="text-sm text-muted sm:ml-auto"></p>
+    </div>
+
+    <!-- table: one row per notification, with View and Delete -->
+    <div id="notification-table" class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white"></div>
+    <div id="pagination" class="mt-4 flex items-center justify-center gap-3"></div>
+  </main>
+
+  <script src="../../js/config.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/ui.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/layout.js"></script>
+  <script src="../../js/pages/admin-notifications.js"></script>
+</body>
+</html>

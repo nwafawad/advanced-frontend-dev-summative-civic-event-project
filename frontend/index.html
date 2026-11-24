@@ -20,13 +20,13 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // Not logged in goes to login, admins go to the dashboard, everyone else to events.
+    // Not logged in goes to login, admins go to the admin dashboard, everyone else to their own dashboard.
     if (!Auth.isLoggedIn()) {
       location.href = 'pages/login.html';
     } else if (Auth.isAdmin()) {
       location.href = 'pages/admin/dashboard.html';
     } else {
-      location.href = 'pages/events.html';
+      location.href = 'pages/dashboard.html';
     }
   </script>
 </body>

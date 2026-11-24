@@ -9,7 +9,7 @@ For the database and backend setup, creating an admin account, the feature list 
 2. Serve this folder with any static server:
    - VS Code: right-click `frontend/index.html` and choose **Open with Live Server**, or
    - from the project root: `npx serve frontend`
-3. Open the address it gives you. `index.html` sends you to the login page, or to the Dashboard (admins) or Events (everyone else) if you are already logged in.
+3. Open the address it gives you. `index.html` sends you to the login page, or, if you are already logged in, to the admin Dashboard (admins) or My dashboard (everyone else).
 
 The API address is set in `js/config.js` (`API_BASE`). Change it if the backend runs somewhere else.
 
@@ -18,7 +18,8 @@ The API address is set in `js/config.js` (`API_BASE`). Change it if the backend 
 | Page | Who can open it | What it does |
 |---|---|---|
 | `pages/login.html`, `pages/signup.html` | Everyone | Log in, or create a normal user account |
-| `pages/events.html` | Logged in | Event list with search, Upcoming/Past/All filter and pages |
+| `pages/dashboard.html` | Normal users | My dashboard: your totals from `GET /dashboard/me` and your next events. Admins are sent to the admin dashboard |
+| `pages/events.html` | Logged in | Event list with search, date, location and Upcoming/Past/All filters, and pages. Accepts `?q=` and `?when=` |
 | `pages/event.html?id=…` | Logged in | Event details, register/cancel, feedback; attendees and all feedback for admins |
 | `pages/announcements.html`, `pages/announcement.html?id=…` | Logged in | Audio announcements and player |
 | `pages/promos.html`, `pages/promo.html?id=…` | Logged in | Promo videos with captions and transcript |
@@ -27,7 +28,8 @@ The API address is set in `js/config.js` (`API_BASE`). Change it if the backend 
 | `pages/my-registrations.html` | Normal users | Your upcoming, past and cancelled registrations |
 | `pages/event-form.html`, `pages/announcement-form.html`, `pages/promo-form.html` | Admins | Create and edit (add `?id=…` to edit) with file preview and upload progress |
 | `pages/admin/dashboard.html` | Admins | Totals and a new-users-per-month chart |
-| `pages/admin/users.html` | Admins | Search users and enable/disable accounts |
+| `pages/admin/users.html` | Admins | Search users, view a user's profile, and enable/disable accounts |
+| `pages/admin/notifications.html` | Admins | Search and filter notifications, view and delete them |
 
 ## How the code is organised
 Every page loads the shared scripts in this order, then its own script from `js/pages/`:
@@ -35,7 +37,7 @@ Every page loads the shared scripts in this order, then its own script from `js/
 ```
 config.js → utils.js → ui.js → api.js → auth.js → layout.js → (event-actions.js) → pages/<page>.js
 ```
-`event-actions.js` is only loaded by the events, event and my registrations pages.
+`event-actions.js` is only loaded by the events, event, my registrations and my dashboard pages.
 
 | File | What it does |
 |---|---|

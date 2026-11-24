@@ -5,6 +5,7 @@ const Layout = {
 
   // Main nav. adminOnly links are only shown to admins, userOnly links only to normal users.
   links: [
+    { file: 'dashboard.html',           label: 'Dashboard',          userOnly: true },
     { file: 'events.html',              label: 'Events' },
     { file: 'announcements.html',       label: 'Announcements' },
     { file: 'promos.html',              label: 'Promos' },
@@ -43,6 +44,7 @@ const Layout = {
     const links = [
       { file: 'admin/dashboard.html',   label: 'Dashboard' },
       { file: 'admin/users.html',       label: 'Users' },
+      { file: 'admin/notifications.html', label: 'Notifications' },
       { file: 'event-form.html',        label: 'New event' },
       { file: 'announcement-form.html', label: 'New announcement' },
       { file: 'promo-form.html',        label: 'New promo' },
