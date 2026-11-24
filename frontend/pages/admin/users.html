@@ -10,7 +10,30 @@
   <link rel="stylesheet" href="../../css/app.css">
 </head>
 <body class="bg-page text-ink">
-  <main id="main"></main>
+  <main id="main">
+    <h1 tabindex="-1" class="text-2xl font-bold">Users</h1>
+    <p class="mt-1 text-sm text-muted">Disabled accounts cannot log in. Roles cannot be changed here.</p>
+
+    <div class="mt-6 flex flex-wrap items-end gap-3">
+      <div class="w-full sm:w-72">
+        <label for="search" class="block text-sm font-semibold">Search by name or email</label>
+        <input id="search" type="search" class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
+      </div>
+      <div>
+        <label for="status" class="block text-sm font-semibold">Status</label>
+        <select id="status" class="mt-1 rounded-md border border-gray-400 px-3 py-2">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="disabled">Disabled</option>
+        </select>
+      </div>
+      <p id="result-count" class="text-sm text-muted sm:ml-auto"></p>
+    </div>
+
+    <!-- table: shows a list of users with their details and actions -->
+    <div id="user-table" class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white"></div>
+    <div id="pagination" class="mt-4 flex items-center justify-center gap-3"></div>
+  </main>
 
   <script src="../../js/config.js"></script>
   <script src="../../js/utils.js"></script>

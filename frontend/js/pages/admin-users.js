@@ -1,0 +1,158 @@
+/* Admin users: search, filter by status, and enable/disable accounts.
+   GET /users returns a plain list (no total), so we load everyone once and page in the browser. */
+$(function () {
+  if (!Auth.requireLogin()) return;
+  Layout.init();
+  if (!Auth.requireAdmin()) return;   // ROLE GUARD 2: normal users see "no access"
+  Layout.adminSidebar();
+
+  const PER_PAGE = 10;
+  let allUsers = [];
+  let currentPage = 1;
+
+  function load() {
+    $('#user-table').html('<p class="p-4 text-sm text-muted">Loading users...</p>');
+    Api.get('/users?limit=1000')
+      .then(function (res) {
+        allUsers = res.data;
+        render();
+      })
+      .fail(function (err) {
+        UI.error('#user-table', err.message, load);
+      });
+  }
+
+  function filteredUsers() {
+    const search = $('#search').val().trim().toLowerCase();
+    const status = $('#status').val();
+    return allUsers.filter(function (user) {
+      if (search && !(user.full_name + ' ' + user.email).toLowerCase().includes(search)) return false;
+      if (status === 'active' && !user.is_active) return false;
+      if (status === 'disabled' && user.is_active) return false;
+      return true;
+    });
+  }
+
+  function row(user) {
+    const isMe = user.id === Auth.user().id;
+    const name = Utils.esc(user.full_name);
+    const badge = user.is_active
+      ? '<span class="rounded bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-800">Active</span>'
+      : '<span class="rounded bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">Disabled</span>';
+
+    // No button on your own row, so an admin cannot lock themselves out
+    const button = isMe ? '' : `
+      <button type="button" data-id="${user.id}" aria-label="${user.is_active ? 'Disable' : 'Enable'} ${name}"
+              class="toggle-btn rounded-md px-3 py-1.5 text-sm font-semibold
+                     ${user.is_active ? 'border border-red-700 text-red-800' : 'bg-brand text-white hover:bg-brand-dark'}">
+        ${user.is_active ? 'Disable' : 'Enable'}</button>`;
+
+    return `
+      <tr class="border-t border-gray-200">
+        <th scope="row" class="px-4 py-3 text-left font-semibold">
+          ${name} ${isMe ? '<span class="text-xs font-normal text-muted">(you)</span>' : ''}</th>
+        <td class="px-4 py-3">${Utils.esc(user.email)}</td>
+        <td class="px-4 py-3 capitalize">${Utils.esc(user.role)}</td>
+        <td class="px-4 py-3">${badge}</td>
+        <td class="whitespace-nowrap px-4 py-3">${new Date(user.created_at).toLocaleDateString()}</td>
+        <td class="px-4 py-3">${button}</td>
+      </tr>`;
+  }
+
+  function render() {
+    const users = filteredUsers();
+    const pageCount = Math.max(1, Math.ceil(users.length / PER_PAGE));
+    if (currentPage > pageCount) currentPage = pageCount;
+    const pageUsers = users.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+    $('#result-count').text(users.length + (users.length === 1 ? ' user' : ' users'));
+
+    if (users.length === 0) {
+      $('#user-table').html(`<div class="p-4">${UI.empty('No users found', 'Try a different search or status.')}</div>`);
+    } else {
+      $('#user-table').html(`
+        <table class="w-full text-sm">
+          <caption class="sr-only">Users, page ${currentPage} of ${pageCount}</caption>
+          <thead class="bg-gray-50 text-left">
+            <tr>
+              <th scope="col" class="px-4 py-3">Name</th>
+              <th scope="col" class="px-4 py-3">Email</th>
+              <th scope="col" class="px-4 py-3">Role</th>
+              <th scope="col" class="px-4 py-3">Status</th>
+              <th scope="col" class="px-4 py-3">Joined</th>
+              <th scope="col" class="px-4 py-3"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>${pageUsers.map(row).join('')}</tbody>
+        </table>`);
+    }
+    renderPagination(pageCount);
+  }
+
+  function renderPagination(pageCount) {
+    if (pageCount <= 1) {
+      $('#pagination').empty();
+      return;
+    }
+    const btn = 'rounded-md border border-gray-400 px-3 py-1.5 text-sm disabled:opacity-50';
+    $('#pagination').html(`
+      <button type="button" data-page="${currentPage - 1}" class="${btn}" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+      <span class="text-sm">Page ${currentPage} of ${pageCount}</span>
+      <button type="button" data-page="${currentPage + 1}" class="${btn}" ${currentPage === pageCount ? 'disabled' : ''}>Next</button>`);
+  }
+
+  // After the table is redrawn, put focus back on the same user's button
+  function focusUser(id) {
+    const button = $(`#user-table .toggle-btn[data-id="${id}"]`);
+    if (button.length) button.focus();
+    else $('h1').focus();   // the status filter now hides this user
+  }
+
+  // ROLE GUARD UI only: this page is admin-only, and the API checks again (403).
+  // The toggle button is only drawn for other users, and the API rejects attempts to disable yourself (403).
+  $('#user-table').on('click', '.toggle-btn', function () {
+    const user = allUsers.find(u => u.id === $(this).data('id'));
+    const action = user.is_active ? 'disable' : 'enable';
+
+    function send() {
+      user.is_active = action === 'enable';
+      render();
+      focusUser(user.id);
+
+      Api.patch('/users/' + user.id + '/' + action)
+        .then(function () {
+          UI.toast(action === 'enable' ? user.full_name + ' can log in again.' : user.full_name + ' has been disabled.');
+        })
+        .fail(function (err) {
+          user.is_active = action !== 'enable';   // put it back
+          render();
+          focusUser(user.id);
+          UI.toast('Could not ' + action + ' ' + user.full_name + '. ' + err.message, 'error');
+        });
+    }
+
+    if (action === 'disable') {
+      UI.confirm('Disable ' + user.full_name + '?', 'They will not be able to log in until you enable the account again.', send);
+    } else {
+      send();
+    }
+  });
+
+  $('#pagination').on('click', 'button', function () {
+    currentPage = Number($(this).data('page'));
+    render();
+    $('h1').focus();
+  });
+
+  // Search and filter always go back to page 1
+  $('#search').on('input', Utils.debounce(function () {
+    currentPage = 1;
+    render();
+  }));
+  $('#status').on('change', function () {
+    currentPage = 1;
+    render();
+  });
+
+  load();
+});
