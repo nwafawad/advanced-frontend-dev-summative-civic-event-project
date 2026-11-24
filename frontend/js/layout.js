@@ -3,12 +3,12 @@
 
 const Layout = {
 
-  // Main nav. adminOnly links are only shown to admins.
+  // Main nav. adminOnly links are only shown to admins, userOnly links only to normal users.
   links: [
     { file: 'events.html',              label: 'Events' },
     { file: 'announcements.html',       label: 'Announcements' },
     { file: 'promos.html',              label: 'Promos' },
-    { file: 'my-registrations.html',    label: 'My registrations' },
+    { file: 'my-registrations.html',    label: 'My registrations',   userOnly: true },
     { file: 'admin/dashboard.html',     label: 'Dashboard',          adminOnly: true },
     { file: 'admin/users.html',         label: 'Users',              adminOnly: true },
   ],
@@ -25,7 +25,8 @@ const Layout = {
   // Nav links. The current page gets aria-current="page".
   navLinks() {
     return this.links
-      .filter(link => !link.adminOnly || Auth.isAdmin())
+      // adminOnly links are for admins, userOnly links for normal users (admins cannot register for events)
+      .filter(link => (!link.adminOnly || Auth.isAdmin()) && (!link.userOnly || !Auth.isAdmin()))
       .map(link => {
         const current = location.pathname.endsWith('/' + link.file);
         return `
@@ -109,7 +110,7 @@ const Layout = {
           <div class="relative md:order-4">
             <button type="button" id="profile-btn" aria-expanded="false" aria-controls="profile-menu"
                     class="flex items-center gap-1 rounded-md px-2 py-2 text-sm font-semibold hover:bg-brand-tint">
-              ${Utils.esc(user.full_name)}
+              <span id="header-name">${Utils.esc(user.full_name)}</span>
               <!-- Icon: Heroicons "chevron-down" (outline), MIT licence, heroicons.com -->
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
