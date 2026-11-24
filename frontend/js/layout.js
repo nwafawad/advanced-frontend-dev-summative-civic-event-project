@@ -58,7 +58,7 @@ const Layout = {
 
           <!-- Bell with unread count -->
           <a id="bell-link" href="${Utils.page('notifications.html')}" aria-label="Notifications"
-             class="relative ml-auto rounded-md p-2 hover:bg-brand-tint md:order-2">
+             class="relative ml-auto rounded-md p-2 hover:bg-brand-tint md:order-3">
             <!-- Icon: Heroicons "bell" (outline), MIT licence, heroicons.com -->
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
@@ -68,7 +68,7 @@ const Layout = {
           </a>
 
           <!-- Profile menu (a simple show/hide button, not an ARIA "menu") -->
-          <div class="relative md:order-3">
+          <div class="relative md:order-4">
             <button type="button" id="profile-btn" aria-expanded="false" aria-controls="profile-menu"
                     class="flex items-center gap-1 rounded-md px-2 py-2 text-sm font-semibold hover:bg-brand-tint">
               ${Utils.esc(user.full_name)}
@@ -97,6 +97,14 @@ const Layout = {
           <nav id="main-nav" aria-label="Main" class="hidden w-full md:order-1 md:block md:w-auto">
             <div class="flex flex-col gap-1 pt-2 md:flex-row md:pt-0">${this.navLinks()}</div>
           </nav>
+
+          <!-- Global search: sends the words to the Events page as ?q= -->
+          <form role="search" action="${Utils.page('events.html')}" class="w-full md:order-2 md:w-auto">
+            <label for="global-search" class="sr-only">Search events</label>
+            <input id="global-search" name="q" type="search" placeholder="Search events"
+                   value="${Utils.esc(Utils.qs('q') || '')}"
+                   class="w-full rounded-md border border-gray-400 px-3 py-1.5 text-sm md:w-56">
+          </form>
         </div>
       </header>`;
   },

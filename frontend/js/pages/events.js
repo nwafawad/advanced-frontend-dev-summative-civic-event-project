@@ -27,6 +27,9 @@ $(function () {
     const now = Date.now();
 
     return allEvents.filter(function (event) {
+      // Normal users only see published events. Admins see everything.
+      if (!Auth.isAdmin() && event.published === false) return false;
+
       const text = (event.title + ' ' + event.location).toLowerCase();
       const isPast = new Date(event.ends_at).getTime() < now;
       if (search && !text.includes(search)) return false;
@@ -99,5 +102,6 @@ $(function () {
     render();
   });
 
+  $('#search').val(Utils.qs('q') || '');   // search typed in the header
   loadEvents();
 });

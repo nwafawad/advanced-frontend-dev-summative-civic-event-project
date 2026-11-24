@@ -20,7 +20,7 @@ function showBanner(text, type) {
 }
 
 if (Utils.qs('registered')) {
-  showBanner('Account created. Log in to continue.', 'success');
+  UI.toast('Account created. Log in to continue.');
 }
 if (Utils.qs('reason') === 'expired') {
   showBanner('Your session expired. Please log in again.', 'warning');
