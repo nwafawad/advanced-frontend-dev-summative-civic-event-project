@@ -20,16 +20,34 @@
        class="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">New event</a>
   </div>
 
-  <div class="mt-6 flex flex-wrap gap-3">
-    <label for="search" class="sr-only">Search events</label>
-    <input id="search" type="search" placeholder="Search by title or location"
-           class="w-full rounded-md border border-gray-400 px-3 py-2 sm:w-80">
-    <label for="when" class="sr-only">Which events</label>
-    <select id="when" class="rounded-md border border-gray-400 px-3 py-2">
-      <option value="upcoming">Upcoming</option>
-      <option value="past">Past</option>
-      <option value="all">All</option>
-    </select>
+  <!-- Filters: search, date, location and upcoming/past -->
+  <div class="mt-6 flex flex-wrap items-end gap-3">
+    <div class="w-full sm:w-64">
+      <label for="search" class="block text-sm font-semibold">Search</label>
+      <input id="search" type="search" placeholder="Title or location"
+             class="mt-1 w-full rounded-md border border-gray-400 px-3 py-2">
+    </div>
+    <div>
+      <label for="date" class="block text-sm font-semibold">Date</label>
+      <input id="date" type="date" class="mt-1 rounded-md border border-gray-400 px-3 py-2">
+    </div>
+    <div>
+      <label for="location-filter" class="block text-sm font-semibold">Location</label>
+      <!-- The options are added by events.js from the loaded events -->
+      <select id="location-filter" class="mt-1 max-w-[14rem] rounded-md border border-gray-400 px-3 py-2">
+        <option value="">All locations</option>
+      </select>
+    </div>
+    <div>
+      <label for="when" class="block text-sm font-semibold">Show</label>
+      <select id="when" class="mt-1 rounded-md border border-gray-400 px-3 py-2">
+        <option value="upcoming">Upcoming</option>
+        <option value="past">Past</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+    <button type="button" id="clear-filters"
+            class="rounded-md border border-gray-400 px-3 py-2 text-sm font-semibold">Clear filters</button>
   </div>
 
   <p id="result-count" class="mt-4 text-sm text-muted" aria-live="polite"></p>

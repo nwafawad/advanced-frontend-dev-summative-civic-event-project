@@ -18,6 +18,7 @@ $(function () {
       .then(function (eventsRes, statuses) {
         allEvents = eventsRes.data;
         myRegistrations = statuses;
+        fillLocations();
         render();
       })
       .fail(function (err) {
@@ -25,18 +26,50 @@ $(function () {
       });
   }
 
-  // Apply the search box and the Upcoming/Past/All filter
+  // Normal users only see published events. Admins see everything.
+  function visibleEvents() {
+    return allEvents.filter(event => Auth.isAdmin() || event.published !== false);
+  }
+
+  // Fill the Location dropdown with each place once, A to Z.
+  // The API has no list of locations, so we take them from the events.
+  function fillLocations() {
+    const chosen = $('#location-filter').val();
+    const places = [];
+    visibleEvents().forEach(function (event) {
+      const place = (event.location || '').trim();
+      if (place && !places.includes(place)) places.push(place);
+    });
+    places.sort((a, b) => a.localeCompare(b));
+
+    $('#location-filter').html('<option value="">All locations</option>' +
+      places.map(place => `<option value="${Utils.esc(place)}">${Utils.esc(place)}</option>`).join(''));
+
+    // Keep the choice if that place is still in the list
+    if (places.includes(chosen)) $('#location-filter').val(chosen);
+  }
+
+  // Is the event on during the chosen day? (date is "YYYY-MM-DD" from the date picker)
+  function isOnDate(event, date) {
+    const dayStart = new Date(date + 'T00:00');    // midnight, local time
+    const dayEnd = new Date(date + 'T00:00');
+    dayEnd.setDate(dayEnd.getDate() + 1);           // next midnight
+    return new Date(event.starts_at) < dayEnd && new Date(event.ends_at) >= dayStart;
+  }
+
+  // Apply the search box, date, location and Upcoming/Past/All filters
   function filteredEvents() {
     const search = $('#search').val().trim().toLowerCase();
+    const date = $('#date').val();
+    const place = $('#location-filter').val();
     const when = $('#when').val();
 
-    return allEvents.filter(function (event) {
-      // Normal users only see published events. Admins see everything.
-      if (!Auth.isAdmin() && event.published === false) return false;
-
+    return visibleEvents().filter(function (event) {
       const text = (event.title + ' ' + event.location).toLowerCase();
       const isPast = EventActions.isPast(event);
       if (search && !text.includes(search)) return false;
+      if (date && !isOnDate(event, date)) return false;
+      if (place && (event.location || '').trim() !== place) return false;
       if (when === 'upcoming' && isPast) return false;
       if (when === 'past' && !isPast) return false;
       return true;
@@ -149,6 +182,7 @@ $(function () {
     const event = allEvents.find(e => e.id === $(this).data('id'));
     EventActions.remove(event, function () {
       allEvents = allEvents.filter(e => e.id !== event.id);
+      fillLocations();
       render();
       $('h1').focus();
       UI.toast('Event deleted.');
@@ -160,9 +194,20 @@ $(function () {
     currentPage = 1;
     render();
   }));
-  $('#when').on('change', function () {
+  $('#date, #location-filter, #when').on('change', function () {
     currentPage = 1;
     render();
+  });
+
+  // Put every filter back to how the page starts
+  $('#clear-filters').on('click', function () {
+    $('#search').val('');
+    $('#date').val('');
+    $('#location-filter').val('');
+    $('#when').val('upcoming');
+    currentPage = 1;
+    render();
+    $('#search').focus();
   });
 
   $('#search').val(Utils.qs('q') || '');   // search typed in the header
