@@ -1,18 +1,23 @@
-/* Events page: list, search, filter and pages.
+/* Events page list, search, filter, pages and card buttons.
    GET /events ignores query params, so we filter and paginate in the browser. */
 $(function () {
   if (!Auth.requireLogin()) return;
   Layout.init();
-  Auth.applyRoleVisibility();   // removes New event for normal users
+  Auth.applyRoleVisibility();   // removes "New event" for normal users
 
   let allEvents = [];
+  let myRegistrations = {};     // normal users: { eventId: 'registered' or 'cancelled' }
   let currentPage = 1;
 
   function loadEvents() {
     $('#event-list').html(UI.skeleton(CONFIG.PAGE_SIZE));
-    Api.get('/events')
-      .then(function (res) {
-        allEvents = res.data;
+
+    // Load the events and (for normal users) their registrations at the same time
+    const registrations = Auth.isAdmin() ? {} : EventActions.loadMyRegistrations();
+    $.when(Api.get('/events'), registrations)
+      .then(function (eventsRes, statuses) {
+        allEvents = eventsRes.data;
+        myRegistrations = statuses;
         render();
       })
       .fail(function (err) {
@@ -24,14 +29,13 @@ $(function () {
   function filteredEvents() {
     const search = $('#search').val().trim().toLowerCase();
     const when = $('#when').val();
-    const now = Date.now();
 
     return allEvents.filter(function (event) {
       // Normal users only see published events. Admins see everything.
       if (!Auth.isAdmin() && event.published === false) return false;
 
       const text = (event.title + ' ' + event.location).toLowerCase();
-      const isPast = new Date(event.ends_at).getTime() < now;
+      const isPast = EventActions.isPast(event);
       if (search && !text.includes(search)) return false;
       if (when === 'upcoming' && isPast) return false;
       if (when === 'past' && !isPast) return false;
@@ -39,17 +43,47 @@ $(function () {
     });
   }
 
+  // ROLE GUARD UI only: admins get Edit/Delete, normal users get Register
+  function cardButtons(event) {
+    const title = Utils.esc(event.title);
+    const small = 'rounded-md px-3 py-1.5 text-sm font-semibold';
+
+    if (Auth.isAdmin()) {
+      return `
+        <a href="event-form.html?id=${event.id}" aria-label="Edit ${title}" class="${small} border border-gray-400">Edit</a>
+        <button type="button" data-id="${event.id}" aria-label="Delete ${title}"
+                class="delete-btn ${small} bg-red-700 text-white">Delete</button>`;
+    }
+
+    const status = myRegistrations[event.id];
+    if (status === 'registered') {
+      return `<span class="${small} text-green-700">✓ Registered</span>`;
+    }
+    if (status === 'cancelled' || EventActions.isPast(event)) {
+      return '';   // cannot register again after cancelling, or the event is over
+    }
+    return `<button type="button" data-id="${event.id}" aria-label="Register for ${title}"
+                    class="register-btn ${small} bg-brand text-white hover:bg-brand-dark">Register</button>`;
+  }
+
   function eventCard(event) {
     const image = event.metadata && event.metadata.image_url;
+    const description = event.description || '';
+    const short = description.length > 100 ? description.slice(0, 100) + '...' : description;
+
     return `
-      <article class="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        ${image ? `<img src="${Utils.esc(image)}" alt="" class="h-40 w-full object-cover">` : ''}
-        <div class="p-4">
-          <h2 class="font-semibold">
-            <a href="event.html?id=${event.id}" class="hover:underline">${Utils.esc(event.title)}</a>
-          </h2>
+      <article class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white">
+        ${image ? `<img src="${Utils.esc(image)}" alt="" loading="lazy" class="h-40 w-full object-cover">` : ''}
+        <div class="flex flex-1 flex-col p-4">
+          <h2 class="font-semibold">${Utils.esc(event.title)}</h2>
           <p class="mt-1 text-sm text-muted">${Utils.formatDate(event.starts_at)}</p>
           <p class="text-sm text-muted">${Utils.esc(event.location)}</p>
+          ${short ? `<p class="mt-2 text-sm">${Utils.esc(short)}</p>` : ''}
+          <div class="mt-auto flex flex-wrap items-center gap-2 pt-4">
+            <a href="event.html?id=${event.id}" aria-label="View ${Utils.esc(event.title)}"
+               class="rounded-md border border-gray-400 px-3 py-1.5 text-sm font-semibold">View</a>
+            ${cardButtons(event)}
+          </div>
         </div>
       </article>`;
   }
@@ -92,6 +126,35 @@ $(function () {
     $('h1').focus();
   });
 
+  // Register from a card
+  $('#event-list').on('click', '.register-btn', function () {
+    const button = $(this);
+    const id = button.data('id');
+    UI.loading(button, true);
+    EventActions.register(id)
+      .then(function () {
+        myRegistrations[id] = 'registered';
+        render();
+        $(`#event-list a[href="event.html?id=${id}"]`).focus();   // keep focus on the same card
+        UI.toast('You are registered.');
+      })
+      .fail(function (err) {
+        UI.loading(button, false);
+        UI.toast(err.message, 'error');
+      });
+  });
+
+  // Delete from a card (admins)
+  $('#event-list').on('click', '.delete-btn', function () {
+    const event = allEvents.find(e => e.id === $(this).data('id'));
+    EventActions.remove(event, function () {
+      allEvents = allEvents.filter(e => e.id !== event.id);
+      render();
+      $('h1').focus();
+      UI.toast('Event deleted.');
+    });
+  });
+
   // Search and filter always go back to page 1
   $('#search').on('input', Utils.debounce(function () {
     currentPage = 1;
@@ -103,5 +166,6 @@ $(function () {
   });
 
   $('#search').val(Utils.qs('q') || '');   // search typed in the header
+  if (Utils.qs('deleted')) UI.toast('Event deleted.');
   loadEvents();
 });
