@@ -8,7 +8,7 @@ const Api = {
     };
 
     // Add the login token if the user is logged in
-    const token = window.Auth ? Auth.token() : null;
+    const token = Auth.token();
     if (token) {
       options.headers.Authorization = 'Bearer ' + token;
     }
@@ -57,7 +57,7 @@ const Api = {
 
     if (xhr.status === 0) {
       message = 'Could not reach the server. Check your connection and try again.';
-    } else if (xhr.status === 401 && !path.startsWith('/auth/') && window.Auth) {
+    } else if (xhr.status === 401 && !path.startsWith('/auth/')) {
       Auth.expire(); // session expired: sign out and redirect to login
     } else if (xhr.status === 403) {
       message = message || 'You do not have permission to do this.';
