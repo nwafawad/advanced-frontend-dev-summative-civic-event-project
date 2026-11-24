@@ -18,6 +18,7 @@ The API address is set in `js/config.js` (`API_BASE`). Change it if the backend 
 | Page | Who can open it | What it does |
 |---|---|---|
 | `pages/login.html`, `pages/signup.html` | Everyone | Log in, or create a normal user account |
+| `pages/accessibility.html` | Everyone | Accessibility statement, linked from every footer |
 | `pages/dashboard.html` | Normal users | My dashboard: your totals from `GET /dashboard/me` and your next events. Admins are sent to the admin dashboard |
 | `pages/events.html` | Logged in | Event list with search, date, location and Upcoming/Past/All filters, and pages. Accepts `?q=` and `?when=` |
 | `pages/event.html?id=…` | Logged in | Event details, register/cancel, feedback; attendees and all feedback for admins |

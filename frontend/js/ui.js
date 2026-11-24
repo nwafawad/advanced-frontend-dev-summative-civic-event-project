@@ -86,7 +86,7 @@ const UI = {
       <div role="alert" class="mx-auto mt-16 max-w-md rounded-lg border bg-white p-6 text-center">
         <h1 class="text-lg font-semibold">You do not have access to this page</h1>
         <p class="mt-2 text-sm text-muted">This page is for administrators. Contact an administrator if you need access.</p>
-        <a href="events.html" class="mt-4 inline-block text-brand underline">Go back to events</a>
+        <a href="${Utils.page('events.html')}" class="mt-4 inline-block text-brand underline">Go back to events</a>
       </div>
     `);
   },

@@ -156,7 +156,7 @@ const Layout = {
       <footer class="border-t border-gray-200 px-6 py-5 text-center text-xs text-muted">
         Help and contact: <a href="mailto:help@civicevents.com" class="underline">help@civicevents.com</a>
         <span class="mx-3" aria-hidden="true">·</span>
-        <a href="#" class="underline">Accessibility statement</a>
+        <a href="${Utils.page('accessibility.html')}" class="underline">Accessibility statement</a>
       </footer>`;
   },
 

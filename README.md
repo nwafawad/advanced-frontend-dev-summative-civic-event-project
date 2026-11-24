@@ -20,7 +20,7 @@ frontend/
     layout.js          Header, nav, notification bell, footer, admin sidebar
     event-actions.js   Register / cancel / delete, shared by the event pages
     pages/             One script per page
-  pages/               Login, signup, my dashboard, events, announcements, promos, notifications, profile, my registrations
+  pages/               Login, signup, my dashboard, events, announcements, promos, notifications, profile, my registrations, accessibility statement
   pages/admin/         Dashboard, users and notifications (admins only)
 ```
 
@@ -146,6 +146,7 @@ Log in with the admin email on the login page and you will land on the admin Das
 - Promos: videos with captions built from the caption text, a Captions on/off button and a transcript
 - Notifications: bell with unread count and the latest 5, inbox with an unread filter, "Mark as read" and "Mark all as read", and a detail page linking to the event, announcement or promo
 - Profile: change your name and email
+- Footer on every page with the help email and a link to the accessibility statement
 
 **Normal users**
 - My dashboard (`GET /dashboard/me`): your registrations, feedback given and notifications (with unread), your next 3 events, and Refresh. This is where you land after logging in
@@ -187,6 +188,7 @@ These guards improve the user experience; they are not security. The real protec
 - Colors meet WCAG AA contrast. Loading animations stop when "reduce motion" is on
 - Pages fade into each other in supported browsers, but switch instantly when "reduce motion" is on
 - Responsive from 360px wide: cards go from 1 to 3 columns, and tables scroll sideways on phones
+- An accessibility statement page (`pages/accessibility.html`, linked from every footer, no login needed) lists what is supported, the known gaps and how to report a problem
 
 ## Performance
 - Promo thumbnails load only when they scroll into view (IntersectionObserver), and event images use `loading="lazy"`
