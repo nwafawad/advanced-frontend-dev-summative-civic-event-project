@@ -55,7 +55,13 @@ $(function () {
         <td class="px-4 py-3 capitalize">${Utils.esc(user.role)}</td>
         <td class="px-4 py-3">${badge}</td>
         <td class="whitespace-nowrap px-4 py-3">${new Date(user.created_at).toLocaleDateString()}</td>
-        <td class="px-4 py-3">${button}</td>
+        <td class="px-4 py-3">
+          <div class="flex gap-2">
+            <button type="button" data-id="${user.id}" aria-label="View ${name}"
+                    class="view-btn rounded-md border border-gray-400 px-3 py-1.5 text-sm font-semibold">View</button>
+            ${button}
+          </div>
+        </td>
       </tr>`;
   }
 
@@ -107,6 +113,65 @@ $(function () {
     if (button.length) button.focus();
     else $('h1').focus();   // the status filter now hides this user
   }
+
+  /* VIEW PROFILE: loads one user with GET /users/:id (admin-only endpoint)
+     and shows it in a dialog. Read only: roles cannot be changed from the UI. */
+  function showProfile(user, openerButton) {
+    const formatDate = iso => iso
+      ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Never';
+
+    const dialog = $(`
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div role="dialog" aria-modal="true" aria-labelledby="profile-title"
+             class="w-full max-w-md rounded-lg bg-white p-6">
+          <h2 id="profile-title" class="text-lg font-semibold">${Utils.esc(user.full_name)}</h2>
+          <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+            <dt class="text-muted">Email</dt>        <dd class="break-all font-semibold">${Utils.esc(user.email)}</dd>
+            <dt class="text-muted">Role</dt>         <dd class="font-semibold capitalize">${Utils.esc(user.role)}</dd>
+            <dt class="text-muted">Status</dt>       <dd class="font-semibold">${user.is_active ? 'Active' : 'Disabled'}</dd>
+            <dt class="text-muted">Joined</dt>       <dd class="font-semibold">${formatDate(user.created_at)}</dd>
+            <dt class="text-muted">Last updated</dt> <dd class="font-semibold">${formatDate(user.updated_at)}</dd>
+          </dl>
+          <p class="mt-4 text-xs text-muted">Roles cannot be changed from the app.</p>
+          <div class="mt-6 flex justify-end">
+            <button type="button" class="close-btn rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">Close</button>
+          </div>
+        </div>
+      </div>`);
+
+    function close() {
+      dialog.remove();
+      $(document).off('keydown.profile');
+      openerButton.focus();   // back to the View button that opened it
+    }
+
+    dialog.find('.close-btn').on('click', close);
+    // Clicking the dark background closes it too
+    dialog.on('click', function (e) { if (e.target === this) close(); });
+    $(document).on('keydown.profile', function (e) {
+      if (e.key === 'Escape') close();
+      // Close is the only button, so Tab stays on it (focus never leaves the dialog)
+      if (e.key === 'Tab') { e.preventDefault(); dialog.find('.close-btn').focus(); }
+    });
+
+    $('body').append(dialog);
+    dialog.find('.close-btn').focus();
+  }
+
+  $('#user-table').on('click', '.view-btn', function () {
+    const button = $(this);
+    UI.loading(button, true);
+    Api.get('/users/' + button.data('id'))
+      .then(function (res) {
+        UI.loading(button, false);
+        showProfile(res.data, button);
+      })
+      .fail(function (err) {
+        UI.loading(button, false);
+        UI.toast(err.status === 404 ? 'This user no longer exists.' : err.message, 'error');
+      });
+  });
 
   // ROLE GUARD UI only: this page is admin-only, and the API checks again (403).
   // The toggle button is only drawn for other users, and the API rejects attempts to disable yourself (403).
