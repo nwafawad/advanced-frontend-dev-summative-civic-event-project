@@ -4,6 +4,8 @@ A multi-page web app for the CivicEvents+ API. Residents can browse and register
 
 Built with **HTML, Tailwind CSS (CDN) and jQuery** only. There is no build step.
 
+**Demo video:** [Watch the walkthrough on YouTube](https://youtu.be/VG7drnBqjrc). The link is also in the [`video-demo`](video-demo/README.md) folder.
+
 ## Project structure
 
 ```
