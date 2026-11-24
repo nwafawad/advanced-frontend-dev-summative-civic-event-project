@@ -84,7 +84,7 @@ const Auth = {
   },
 
    /* ROLE GUARD 2: admin-only pages
-     Used on admin/dashboard, admin/users, admin/notifications and the
+     Used on admin/dashboard, admin/users and the
      event/announcement/promo forms. A normal user sees "You do not have access".
      This is for UX only. The backend's authorize(['admin']) is the real
      security and rejects non-admins with 403. */

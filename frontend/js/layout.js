@@ -11,7 +11,6 @@ const Layout = {
     { file: 'my-registrations.html',    label: 'My registrations' },
     { file: 'admin/dashboard.html',     label: 'Dashboard',          adminOnly: true },
     { file: 'admin/users.html',         label: 'Users',              adminOnly: true },
-    { file: 'admin/notifications.html', label: 'Send notification',  adminOnly: true },
   ],
 
   init() {
@@ -56,16 +55,28 @@ const Layout = {
             CivicEvents+
           </a>
 
-          <!-- Bell with unread count -->
-          <a id="bell-link" href="${Utils.page('notifications.html')}" aria-label="Notifications"
-             class="relative ml-auto rounded-md p-2 hover:bg-brand-tint md:order-3">
-            <!-- Icon: Heroicons "bell" (outline), MIT licence, heroicons.com -->
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
-            </svg>
-            <span id="unread-badge" aria-hidden="true"
-                  class="absolute -right-1 -top-1 hidden rounded-full bg-red-700 px-1.5 text-xs font-bold text-white"></span>
-          </a>
+          <!-- Bell: opens a small panel with the latest notifications -->
+          <div class="relative ml-auto md:order-3">
+            <button type="button" id="bell-btn" aria-expanded="false" aria-controls="bell-panel" aria-label="Notifications"
+                    class="relative rounded-md p-2 hover:bg-brand-tint">
+              <!-- Icon: Heroicons "bell" (outline), MIT licence, heroicons.com -->
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+              </svg>
+              <span id="unread-badge" aria-hidden="true"
+                    class="absolute -right-1 -top-1 hidden rounded-full bg-red-700 px-1.5 text-xs font-bold text-white"></span>
+            </button>
+            <!-- On phones the panel spans the screen, from md up it hangs under the bell -->
+            <div id="bell-panel" class="fixed left-4 right-4 top-16 z-20 hidden rounded-md border border-gray-200 bg-white shadow-md
+                                        md:absolute md:left-auto md:right-0 md:top-full md:mt-2 md:w-80">
+              <p class="border-b border-gray-200 px-4 py-2 text-sm font-semibold">Latest notifications</p>
+              <ul id="bell-list">
+                <li class="px-4 py-3 text-sm text-muted">Loading...</li>
+              </ul>
+              <a href="${Utils.page('notifications.html')}"
+                 class="block border-t border-gray-200 px-4 py-2 text-center text-sm font-semibold text-brand hover:bg-brand-tint">See all notifications</a>
+            </div>
+          </div>
 
           <!-- Profile menu (a simple show/hide button, not an ARIA "menu") -->
           <div class="relative md:order-4">
@@ -133,17 +144,31 @@ const Layout = {
       $('#profile-menu').toggleClass('hidden', open);
     });
 
-    // Close the profile menu with Escape, or by clicking anywhere else
+    // Notifications panel. It is drawn each time it opens, so read/unread is up to date.
+    $('#bell-btn').on('click', function () {
+      const open = $(this).attr('aria-expanded') === 'true';
+      if (!open) Layout.renderBellPanel();
+      $(this).attr('aria-expanded', !open);
+      $('#bell-panel').toggleClass('hidden', open);
+    });
+
+    // Escape closes whichever one is open and puts focus back on its button
     $(document).on('keydown', function (e) {
-      if (e.key === 'Escape' && $('#profile-btn').attr('aria-expanded') === 'true') {
+      if (e.key !== 'Escape') return;
+      if ($('#profile-btn').attr('aria-expanded') === 'true') {
         Layout.closeProfileMenu();
         $('#profile-btn').focus();
       }
-    });
-    $(document).on('click', function (e) {
-      if (!$(e.target).closest('#profile-btn, #profile-menu').length) {
-        Layout.closeProfileMenu();
+      if ($('#bell-btn').attr('aria-expanded') === 'true') {
+        Layout.closeBellPanel();
+        $('#bell-btn').focus();
       }
+    });
+
+    // Clicking anywhere else closes them
+    $(document).on('click', function (e) {
+      if (!$(e.target).closest('#profile-btn, #profile-menu').length) Layout.closeProfileMenu();
+      if (!$(e.target).closest('#bell-btn, #bell-panel').length) Layout.closeBellPanel();
     });
 
     $('#logout-btn').on('click', () => Auth.logout());
@@ -154,9 +179,16 @@ const Layout = {
     $('#profile-menu').addClass('hidden');
   },
 
-  /* UNREAD COUNT
+  closeBellPanel() {
+    $('#bell-btn').attr('aria-expanded', 'false');
+    $('#bell-panel').addClass('hidden');
+  },
+
+  /* NOTIFICATIONS AND UNREAD COUNT
      The backend has no "mark as read", so we keep the IDs of notifications
-     this user has opened in localStorage */
+     this user has read in localStorage */
+  notifications: null,   // filled by loadUnreadCount(); null while still loading
+
   readKey() {
     return 'ce_read_' + Auth.user().id;
   },
@@ -169,6 +201,10 @@ const Layout = {
     }
   },
 
+  isRead(id) {
+    return this.readIds().includes(id);
+  },
+
   markRead(id) {
     const ids = this.readIds();
     if (!ids.includes(id)) ids.push(id);
@@ -177,14 +213,37 @@ const Layout = {
 
   loadUnreadCount() {
     Api.get('/notifications').then(function (res) {
-      const readIds = Layout.readIds();
-      const unread = res.data.filter(n => !readIds.includes(n.id)).length;
-      Layout.setBadge(unread);
+      Layout.notifications = res.data;
+      Layout.setBadge(res.data.filter(n => !Layout.isRead(n.id)).length);
     });
+  },
+
+  // The 5 newest notifications, for the bell panel
+  renderBellPanel() {
+    if (!this.notifications) return;   // still loading: keep "Loading..."
+    const latest = this.notifications.slice(0, 5);
+    if (latest.length === 0) {
+      $('#bell-list').html('<li class="px-4 py-3 text-sm text-muted">No notifications yet.</li>');
+      return;
+    }
+    $('#bell-list').html(latest.map(function (n) {
+      const unread = !Layout.isRead(n.id);
+      return `
+        <li>
+          <a href="${Utils.page('notification.html?id=' + n.id)}" class="block border-b border-gray-100 px-4 py-3 text-sm hover:bg-brand-tint">
+            <span class="flex items-center gap-2 ${unread ? 'font-semibold' : ''}">
+              ${unread ? '<span class="h-2 w-2 shrink-0 rounded-full bg-brand" aria-hidden="true"></span><span class="sr-only">Unread:</span>' : ''}
+              ${Utils.esc(n.title)}
+            </span>
+            <span class="mt-0.5 block text-muted line-clamp-2">${Utils.esc(n.message)}</span>
+            <span class="mt-0.5 block text-xs text-muted">${Utils.timeAgo(n.created_at)}</span>
+          </a>
+        </li>`;
+    }).join(''));
   },
 
   setBadge(count) {
     $('#unread-badge').text(count > 9 ? '9+' : count).toggleClass('hidden', count === 0);
-    $('#bell-link').attr('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
+    $('#bell-btn').attr('aria-label', count ? `Notifications, ${count} unread` : 'Notifications');
   },
 };

@@ -10,4 +10,6 @@ const CONFIG = {
     video: { exts: ['mp4', 'mov', 'avi', 'mkv'], maxMB: 8 },
   },
   PROMOS_CACHE_KEY: 'ce_promos_cache',   // sessionStorage key for the cached promos list
+  // Labels for the notification "type" values the backend uses
+  NOTIFICATION_TYPES: { event: 'Event', announcement: 'Announcement', promo: 'Promo' },
 };
